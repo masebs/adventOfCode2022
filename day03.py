@@ -27,13 +27,13 @@ for lnr in range(0, len(lines), 3):
         items1 = set(l[:len(l)//2])
         items2 = set(l[len(l)//2:])
         # Part 1: find double item in each elf's rucksack
-        (doubleItem,) = items1.intersection(items2)
+        (doubleItem,) = set.intersection(items1, items2)
         prioT1 += getPrio(doubleItem)
         # print(doubleItem)
-        elfsets.append(items1.union(items2))
+        elfsets.append(set.union(items1, items2))
         
     # Part 2: for the set of 3 elves, find their common item (= badge)
-    (badge,) = elfsets[0].intersection(elfsets[1]).intersection(elfsets[2])
+    (badge,) = set.intersection(elfsets[0], elfsets[1], elfsets[2])
     # print(badge)
     prioT2 += getPrio(badge)
     
