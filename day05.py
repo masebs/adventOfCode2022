@@ -18,13 +18,15 @@ def readinput():
     colpos = []
     for l in lines[::-1]: 
         if l != '\n' and parsecmds:
-            cmd = l.replace('move', '')
-            cmd = cmd.replace('from', '')
-            cmd = cmd.replace('to', '')
-            cmd = cmd.strip()
-            cmd = cmd.split()
-            cmd = [int(c) for c in cmd]
-            cmds.append(cmd)
+            # cmd = l.replace('move', '')
+            # cmd = cmd.replace('from', '')
+            # cmd = cmd.replace('to', '')
+            # cmd = cmd.strip()
+            # cmd = cmd.split()
+            # cmd = [int(c) for c in cmd]
+            # cmds.append(cmd)
+            (_, a, _, b, _, c) = [t(s) for t, s in zip((str, int, str, int, str, int), l.split())]
+            cmds.append([a, b, c])
         elif l == '\n':
             parsecmds = False
             continue
