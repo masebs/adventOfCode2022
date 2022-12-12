@@ -66,13 +66,13 @@ def BFS(grid, startidx, endidx, backwards=False):
         nbs = [ngrid[idx[0]][idx[1]] for idx in getNeighborIndices(n, (len(ngrid), len(ngrid[0])))]
         for nbr in nbs:
             if nbr.index not in visited:
+                visited.add(nbr.index)
                 if (not backwards and nbr.value-n.value <= 1) or (backwards and nbr.value-n.value >= -1):
                     nbr.prev = n
                     nbr.dist = n.dist + 1
                     q.append(nbr)
-                    visited.add(n.index)
                 
-def dijkstra(grid, startidx, endidx, backwards=False): # with distance = number of steps, this is effectively BFS
+def dijkstra(grid, startidx, endidx, backwards=False): # with distance = number of steps
     yellow = PriorityQueue() # prio q seems to reduce by a factor of almost 10 to ~3s
     yellowSet = set() # using additional Set for more efficient "in" (contains) op saves ~3s
     green  = set() # using set instead of list for green: 26 s w/o, 45 s with output instead of > 10 min with list
@@ -126,15 +126,15 @@ def main():
     # grid, startidx, endidx = readInput("input-day12-test")
     
     # Task 1
-    # endnode = dijkstra(grid, startidx, endidx)
-    endnode = BFS(grid, startidx, endidx)
+    endnode = dijkstra(grid, startidx, endidx)
+    # endnode = BFS(grid, startidx, endidx)
     # traceback(endnode, startidx)
     print(f"Task 1: Easiest path takes {endnode.dist} steps")
     
     # Task 2: search from target to any point with height 'a' 
     # (this works because the first one found is automatically the one with the shortest path, as we only do BFS)
-    # endnode = dijkstra(grid, endidx, None, backwards=True) 
-    endnode = BFS(grid, endidx, None, backwards=True) 
+    endnode = dijkstra(grid, endidx, None, backwards=True) 
+    # endnode = BFS(grid, endidx, None, backwards=True) 
     print(f"Task 2: Fewest steps from any possible starting point is {endnode.dist}")
 
 if __name__ == "__main__":
