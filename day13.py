@@ -75,7 +75,7 @@ def main():
         
     print(f"Task 1: Sum of indices of correctly ordered pairs: {sum(rightorderidcs)}")
     
-    # Task 2: Bubblesort
+    # Task 2: Bubblesort, or sorted, or don't even sort at all (unfortunately not my idea)
     packets.append([[2]]) # additional packages according to task
     packets.append([[6]])
     
@@ -87,10 +87,16 @@ def main():
     # from functools import cmp_to_key # use sort with custom compare function as key; the fast way
     # packets.sort(key=cmp_to_key(compare), reverse=True)
     
+    res2 = (packets.index([[2]]) + 1) * (packets.index([[6]]) + 1)
+    
+    # fastest approach: Don't sort, just go through list linearly and count how many are smaller!
+    # smallerThan2 = sum([1 for i in range(len(packets)) if compare(packets[i], [[2]]) == 1])
+    # smallerThan6 = sum([1 for i in range(len(packets)) if compare(packets[i], [[6]]) == 1])
+    # res2 = (smallerThan2+1) * (smallerThan6+1)
+    
     # for p in packets:
     #     print(p)
     
-    res2 = (packets.index([[2]]) + 1) * (packets.index([[6]]) + 1)
     print(f"Task 2: Product of the divider packages is {res2}")
 
 if __name__ == "__main__":
