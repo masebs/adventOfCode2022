@@ -5,59 +5,49 @@ Advent of Code 2022
 @author marc 
 """
 
-import ast
-
-with open("input-day13", 'r') as f:
-# with open("input-day13-test", 'r') as f:
-    lines = [l.strip() for l in f.readlines()]
-
-packets = []
-
-# def parseList(string):
-#     skip = range(-1,-1)
-#     curlist = []
-#     for i,c in enumerate(string):
-#         if i not in skip:
-#             if c == '[':
-#                 sublist, charcount = parseList(string[i+1:])
-#                 curlist.append(sublist)
-#                 skip = range(i, i+charcount)
-#             elif c == ']':
-#                 return curlist, i
-#             else:
-#                 curlist.append(c)
-#     properlist = []
-#     curnr = 0
-#     digitcount = 0
-#     while curlist:
-#         cur = curlist.pop(0)
-#         if type(cur) == list:
-#             properlist.append(cur)
-#         elif type(cur) == ',':
-#             properlist.add(curnr)
-#             curnr = 0
-#             digitcount = 0
-#         else: # number
-#             digitcount +=1
-#             curnr += int(cur) * digitcount*10
-        
-#     print(properlist)
-#     return properlist
-                
+def readInput(filename):
+    with open(filename, 'r') as f:
+        lines = [l.strip() for l in f.readlines()]
     
-for l in lines:
-    if l != '':
-        packets.append(ast.literal_eval(l))
-        # packets.append(parseList(l))
-        # print(f" curitem: {curitem}")
-  
-def compare(el1, el2):
+    packets = []
+    for l in lines:
+        if l != '':
+            # packets.append(eval(l)) # the cheating and risky way (conveniently it's Python syntax)
+            packets.append(parseList(l)) # the proper way 
+    return lines
+        
+def parseList(string):
+    curlist = []
+    stack = []
+    nr = ''
+    for i,c in enumerate(string):
+        # print(f"char {c}, stack: {stack}")
+        if c == '[': # open a new sub-list and store the current one on the stack
+            stack.append(curlist) 
+            curlist = []
+        elif c == ',':
+            if nr: # append nr; if nr='', then we are after a ']', so nothing to do
+                curlist.append(int(nr))
+                nr = ''
+        elif c == ']': # this closes the current sub-list, so...
+            if nr:     # if before it was a number, append it; otherwise we are after a ']'
+                curlist.append(int(nr))
+                nr = ''
+            parentlist = stack.pop()   # get the next outer list from stack (it must be on top now)
+            parentlist.append(curlist) # append the current inner list to the outer list
+            curlist = parentlist       # go one level up
+        else: # a number (character), so just collect in a string
+            nr += c 
+    return curlist[0] # the outer list ever only contains one single item (if there is only one list per line)
+
+# compares two elements (lists or int) recursively; returns 1 if el1 < el2, -1 if el1 > el2, 0 if equal
+def compare(el1, el2): 
     if type(el1) == list and type(el2) == int:
         el2 = [el2]
     elif type(el1) == int and type(el2) == list:
         el1 = [el1]
     
-    # print(f"in rekCheck: {el1} | {el2}")
+    # print(f"in compare: {el1} | {el2}")
     if type(el1) == int and type(el2) == int:
         if el1 < el2: # correct order
             return 1
@@ -75,47 +65,39 @@ def compare(el1, el2):
     else:
         print("SHOULDN'T HAPPEN")
     return 0        
-
-rightorderidcs = []
-
-for i in range(0, len(packets), 2):
-    p1 = packets[i]
-    p2 = packets[i+1]
-    idx = i // 2
-    # print(p1)
-    # print(p2)
-    # print()
-    order = compare(p1, p2)
-       
-    if order == 1:
-        # print('-> right order!')
-        rightorderidcs.append(idx+1)
-    # elif order == -1:
-    #     print('-> wrong order!')
-    # else:
-    #     print('-> dunno')
-    # print()
-    # print()
     
-print(f"Task 1: Sum of indices of correctly ordered pairs: {sum(rightorderidcs)}")
+def main():
+    lines = readInput("input-day13")
+    # lines = readInput("input-day13-test")
+    
+    packets = [parseList(l) for l in lines if l]
+    rightorderidcs = [i//2+1 for i in range(0, len(packets), 2) if compare(packets[i], packets[i+1]) == 1]
+        
+    print(f"Task 1: Sum of indices of correctly ordered pairs: {sum(rightorderidcs)}")
+    
+    # Task 2: Bubblesort, or sorted, or don't even sort at all (unfortunately not my idea)
+    packets.append([[2]]) # additional packages according to task
+    packets.append([[6]])
+    
+    for n in range(len(packets)): # do bubblesort; the funny way
+        for i in range(len(packets)-1 - n):
+            if compare(packets[i], packets[i+1]) == -1:
+                packets[i], packets[i+1] = packets[i+1], packets[i]
+    
+    # from functools import cmp_to_key # use sort with custom compare function as key; the fast way
+    # packets.sort(key=cmp_to_key(compare), reverse=True)
+    
+    res2 = (packets.index([[2]]) + 1) * (packets.index([[6]]) + 1)
+    
+    # fastest approach: Don't sort, just go through list linearly and count how many are smaller!
+    # smallerThan2 = sum([1 for i in range(len(packets)) if compare(packets[i], [[2]]) == 1])
+    # smallerThan6 = sum([1 for i in range(len(packets)) if compare(packets[i], [[6]]) == 1])
+    # res2 = (smallerThan2+1) * (smallerThan6+1)
+    
+    # for p in packets:
+    #     print(p)
+    
+    print(f"Task 2: Product of the divider packages is {res2}")
 
-# Task 2: Bubblesort
-packets.append([[2]]) # additional packages according to task
-packets.append([[6]])
-
-def swapPackets(packets, idx1, idx2):
-    swap = packets[idx1]
-    packets[idx1] = packets[idx2]
-    packets[idx2] = swap
-
-for n in range(len(packets)): # do bubblesort
-    for i in range(len(packets)-1):
-        if compare(packets[i], packets[i+1]) == -1:
-            swapPackets(packets, i, i+1)
-
-# for p in packets:
-#     print(p)
-
-res2 = (packets.index([[2]]) + 1) * (packets.index([[6]]) + 1)
-print(f"Task 2: Product of the divider packages is {res2}")
-
+if __name__ == "__main__":
+    main()
