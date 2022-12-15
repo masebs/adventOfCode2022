@@ -7,12 +7,12 @@ Advent of Code 2022
 
 import re
 
-with open("input-day15", 'r') as f:
-    lines = f.readlines() #[l.strip().split() for l in f.readlines()]
-targetrow = 2000000
-# with open("input-day15-test", 'r') as f:
+# with open("input-day15", 'r') as f:
 #     lines = f.readlines() #[l.strip().split() for l in f.readlines()]
-# targetrow = 10
+# targetrow = 2000000
+with open("input-day15-test", 'r') as f:
+    lines = f.readlines() #[l.strip().split() for l in f.readlines()]
+targetrow = 10
 
 def distance(p1, p2):
     return abs(p1[0]-p2[0]) + abs(p1[1]-p2[1])
@@ -89,29 +89,41 @@ print()
 oldlist = occupList.copy()
 united = []
 oldlist.sort(key = lambda el: el[0], reverse=False)
+print(oldlist)
 while len(united) != len(oldlist) and len(oldlist) > 1:
-    print(len(united), len(oldlist))
     if united: # not in the first round
         oldlist = united
         united = [] 
     
-    for i in range(len(oldlist)-1):
-        if oldlist[i+1][0] >= oldlist[i][0] and oldlist[i+1][1] <= oldlist[i][1]: # i+1 is within i
+    for i in range(0, len(oldlist)-1, 2):
+        print("  ", oldlist[i], oldlist[i+1], "->", end="")
+        if oldlist[i+1][0] > oldlist[i][1] and oldlist[i+1][1] <= oldlist[i][1]: # i+1 is within i
+            print("  case 1") 
             united.append(oldlist[i])
         elif oldlist[i+1][0] <= oldlist[i][1] and oldlist[i+1][1] <= oldlist[i][1]:
-            united.append((oldlist[i+1][0], oldlist[i][1]))
-        elif oldlist[i+1][0] <= oldlist[i][1] and oldlist[i+1][1] >= oldlist[i][1]: # i is within i+1
-            united.append((oldlist[i+1][0], oldlist[i+1][1]))
-        elif oldlist[i+1][0] >= oldlist[i][1] and oldlist[i+1][1] >= oldlist[i][1]:
+            print("  case 2")
             united.append((oldlist[i][0], oldlist[i][1]))
+        elif oldlist[i+1][0] <= oldlist[i][1] and oldlist[i+1][1] > oldlist[i][1]: 
+            print("  case 3")
+            united.append((oldlist[i][0], oldlist[i+1][1]))
+        # elif oldlist[i+1][0] > oldlist[i][1] and oldlist[i+1][1] > oldlist[i][1]:
+        #     print("  case 4")
+        #     united.append((oldlist[i][0], oldlist[i][1]))
         else: # no overlap, so add both
+            print("  case else")
             united.append(oldlist[i])
             united.append(oldlist[i+1])
+        print("  ", united[-1])
     united.sort(key = lambda el: el[0])
-       
+    print(oldlist)
+    print(united)
+    print()
+
+united = oldlist
+uniqueBeacons = set(b for b in subtractBeacons if type(b) == tuple)
 
 count = 0
-for r in uniqueRanges: 
+for r in united: 
     count += r[1] - r[0] + 1
 count -= len(uniqueBeacons)
 
